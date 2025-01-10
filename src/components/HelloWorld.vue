@@ -2,15 +2,30 @@
 import { UploadFilled } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
-
+import 'viewerjs/dist/viewer.css';
+import Viewer from 'v-viewer';
 import 'element-plus/theme-chalk/el-message-box.css';
+import { api as viewerApi } from "v-viewer"
+import { ref } from 'vue'
+
 export default{ 
   data(){
     return {
       tableData:[],
-      svgUrl:""
+      svgUrl:"",
+      viewerOptions: {
+        inline: true, // 启用内联模式
+        toolbar: true, // 显示工具栏
+        navbar: false, // 显示导航栏
+        button: false, // 显示按钮
+        title: false, // 隐藏标题
+        transition: false,
+        zoomRatio: 0.5
+      },images:[],
   }
-},
+},  directives: {
+    viewer: Viewer.directive,
+  },
   methods:
   {
     handleUploadSuccess(response, file, fileList){
@@ -26,7 +41,7 @@ export default{
     }, handleEdit(index, id){
 
 
-  const url = '/convert';
+  const url = '/api/convert';
 
 // 3. 定义请求的参数
 const data = {
@@ -46,6 +61,8 @@ axios
   .then((response) => {
     // 请求成功，处理响应数据
     this.svgUrl =  response.data
+    this.images=[];
+    this.images.push(response.data);
     console.log('请求成功，响应数据：', response.data);
   })
   .catch((error) => {
@@ -63,8 +80,9 @@ axios
     }
   });
 },
-handleDelete(index, row){
-  console.log(index, row)
+handleDelete(index){
+  this.tableData.splice(index, 1)
+
 }
   }
 
@@ -81,7 +99,7 @@ handleDelete(index, row){
     :on-error="handleError"
     accept=".dwg"
     drag
-    action="/upload">
+    action="/api/upload">
     <el-icon class="el-icon--upload"><upload-filled /></el-icon>
     <div class="el-upload__text">
       拖放 或者 <em> 点击上传dwg格式文件</em>
@@ -91,9 +109,9 @@ handleDelete(index, row){
     </el-col>  
   </el-row>
   <el-row> 
-    <el-col :span="8">
+    <el-col :span="8" :offset="8">
       <el-table :data="tableData" style="width: 100%">
-    <el-table-column label="名称" width="180">
+    <el-table-column  width="240">
       <template #default="scope">
         <el-popover effect="light" trigger="hover" placement="top" width="auto">
           <template #default>
@@ -105,7 +123,7 @@ handleDelete(index, row){
         </el-popover>
       </template>
     </el-table-column>
-    <el-table-column label="操作">
+    <el-table-column width="auto" header-align="right" align="right">
       <template #default="scope">
         <el-button
         type="success"
@@ -115,17 +133,34 @@ handleDelete(index, row){
         <el-button
           size="small"
           type="danger"
-          @click="handleDelete(scope.$index, scope.row)">
+          @click="handleDelete(scope.$index)">
           移除
         </el-button>
       </template>
     </el-table-column>
   </el-table>
   </el-col>
-    <el-col :span="16">
+</el-row>
+<el-row>
+    <el-col :span="24">
       <div>    
-      <img :src=svgUrl class="logo element-plus" alt="转换完成文件预览">    
+        <viewer :images="images" :options="viewerOptions" class="hidden-thumbnails">
+          <img v-for="src in images" :key="src" :src="src" >
+       </viewer>  
       </div>
     </el-col>
   </el-row>
 </template>
+<style scoped>
+.hidden-thumbnails
+{
+  height: 600px;
+  width: 100%;
+}
+.hidden-thumbnails img {
+  display: none; /* 隐藏缩略图 */
+  width: 0 px;
+
+}
+
+</style>

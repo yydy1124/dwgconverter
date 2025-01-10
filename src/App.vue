@@ -3,7 +3,7 @@
     <div class="main-container flex">   
       <div w="full" py="4">
          <BaseHeader />
-         <Logos />
+        
         <HelloWorld />
       </div>
     </div>

@@ -18,7 +18,8 @@ import 'uno.css'
 // If you want to use ElMessage, import it.
 import 'element-plus/theme-chalk/src/message.scss'
 import 'element-plus/theme-chalk/src/message-box.scss'
-
+import 'viewerjs/dist/viewer.css'
+import VueViewer from 'v-viewer'
 // if you do not need ssg:
 // import { createApp } from "vue";
 
@@ -42,5 +43,11 @@ export const createApp = ViteSSG(
     Object.values(import.meta.glob<{ install: UserModule }>('./modules/*.ts', { eager: true }))
       .forEach(i => i.install?.(ctx))
     // ctx.app.use(Previewer)
+    ctx.app.use(VueViewer)
+
   },
 )
+
+
+
+
